@@ -24,6 +24,12 @@ operator fun Vec3.times(f: Float): Vec3 {
     return Vec3(x * f, y * f, z * f)
 }
 
+fun Vec3.cross(vec: Vec3): Vec3 {
+    return Vec3(y * vec.z - z * vec.y,
+            z * vec.x - x * vec.z,
+            x * vec.y - y * vec.x)
+}
+
 operator fun Float.times(vec: Vec3): Vec3 {
     return vec * this
 }

@@ -1,33 +1,40 @@
 package rayTracingInAWeeking
 
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.runBlocking
+import me.tongfei.progressbar.ProgressBar
 import rayTracingInAWeeking.hittables.Hittable
 import rayTracingInAWeeking.hittables.HittableList
 import rayTracingInAWeeking.hittables.Sphere
-import me.tongfei.progressbar.ProgressBar
-import kotlin.math.sqrt
-import kotlin.random.Random
-import kotlinx.coroutines.*
+import rayTracingInAWeeking.material.Dielectric
 import rayTracingInAWeeking.material.Lambertian
 import rayTracingInAWeeking.material.Metal
 import java.io.File
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sqrt
+import kotlin.random.Random
 
 fun main() {
-    val nx = 3000
-    val ny = 1500
-    val ns = 1000
+    val nx = 2560
+    val ny = 1440
+    val ns = 25
     val maxDepth = 50
 
     val buffer = StringBuilder("P3\n$nx $ny\n255\n")
 
+    val r = cos(PI / 4).toFloat()
     val world = HittableList()
-    world.add(Sphere(Vec3(0f, 0f, -1f), 0.5f, Lambertian(Vec3(0.7f, 0.3f, 0.3f))))
+    world.add(Sphere(Vec3(0f, 0f, -1f), 0.5f, Lambertian(Vec3(0.0f, 0.1f, 0.4f))))
     world.add(Sphere(Vec3(0f, -100.5f, 1f), 100f, Lambertian(Vec3(0.8f, 0.8f, 0f))))
 
     world.add(Sphere(Vec3(1f, 0f, -1f), 0.5f, Metal(Vec3(0.8f, 0.6f, 0.2f), 0.2f)))
-    world.add(Sphere(Vec3(-1f, 0f, -1f), 0.5f, Metal(Vec3(0.8f, 0.8f, 0.8f), 0.5f)))
+    world.add(Sphere(Vec3(-1f, 0f, -1f), 0.5f, Dielectric(3f)))
 
 
-    val cam = Camera()
+    val vup = Vec3(0f, 1f, 0f)
+    val cam = cameraForFov(Vec3(-2f, 2f, 1f), Vec3(0f, 0f, -1f), vup, 20f, nx.toFloat() / ny)
     val rand = Random.Default
 
     val pb = ProgressBar("Rendering", nx * ny.toLong())
@@ -41,12 +48,14 @@ fun main() {
 
     values.map {
         GlobalScope.async {
+//          runBlocking {
             renderPixel(it, ns, rand, nx, ny, cam, world, maxDepth)
         }
     }
             .forEach {
                 runBlocking {
                     val col = it.await()
+//                    val col = it
                     pb.step()
                     buffer.append("${col.first} ${col.second} ${col.third}\n")
                 }

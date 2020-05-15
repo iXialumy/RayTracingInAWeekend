@@ -16,12 +16,18 @@ class Sphere(private val center: Vec3, private val radius: Float, private val ma
             var temp = (-b - sqrt(discriminant)) / a
             if (temp < tMax && temp > tMin) {
                 val p = ray.pointAtParameter(temp)
-                return HitRecord(temp, p, (p - center) / radius, material)
+                val hr = HitRecord(temp, p, (p - center) / radius, material)
+                val outwardNormal = (p - center) / radius
+                hr.setFaceNormal(ray, outwardNormal)
+                return hr
             }
             temp = (-b - sqrt(discriminant)) / a
             if (temp < tMax && temp > tMin) {
                 val p = ray.pointAtParameter(temp)
-                return HitRecord(temp, p, (p - center) / radius, material)
+                val hr = HitRecord(temp, p, (p - center) / radius, material)
+                val outwardNormal = (p - center) / radius
+                hr.setFaceNormal(ray, outwardNormal)
+                return hr
             }
         }
         return null
