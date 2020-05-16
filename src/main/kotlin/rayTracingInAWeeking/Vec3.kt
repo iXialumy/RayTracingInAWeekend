@@ -7,6 +7,9 @@ data class Vec3(val x: Float, val y: Float, val z: Float)
 operator fun Vec3.plus(v2: Vec3): Vec3 {
     return Vec3(x + v2.x, y + v2.y, z + v2.z)
 }
+operator fun Vec3.plus(f: Float): Vec3 {
+    return Vec3(x + f, y + f, z + f)
+}
 
 operator fun Vec3.minus(v2: Vec3): Vec3 {
     return Vec3(x - v2.x, y - v2.y, z - v2.z)

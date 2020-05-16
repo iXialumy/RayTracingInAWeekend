@@ -17,24 +17,23 @@ import kotlin.math.sqrt
 import kotlin.random.Random
 
 fun main() {
-    val nx = 2560
-    val ny = 1440
-    val ns = 25
+    val nx = 256 * 4
+    val ny = 144 * 4
+    val ns = 50
     val maxDepth = 50
 
     val buffer = StringBuilder("P3\n$nx $ny\n255\n")
 
     val r = cos(PI / 4).toFloat()
-    val world = HittableList()
-    world.add(Sphere(Vec3(0f, 0f, -1f), 0.5f, Lambertian(Vec3(0.0f, 0.1f, 0.4f))))
-    world.add(Sphere(Vec3(0f, -100.5f, 1f), 100f, Lambertian(Vec3(0.8f, 0.8f, 0f))))
+    val world = generateWorld()
 
-    world.add(Sphere(Vec3(1f, 0f, -1f), 0.5f, Metal(Vec3(0.8f, 0.6f, 0.2f), 0.2f)))
-    world.add(Sphere(Vec3(-1f, 0f, -1f), 0.5f, Dielectric(3f)))
-
-
+    println("Setting up Camera")
     val vup = Vec3(0f, 1f, 0f)
-    val cam = cameraForFov(Vec3(-2f, 2f, 1f), Vec3(0f, 0f, -1f), vup, 20f, nx.toFloat() / ny)
+    val aperture = 0.1f
+    val lookFrom = Vec3(13f, 2f, 3f)
+    val lookAt = Vec3(0f, 0f, 0f)
+    val focusDistance = 10f
+    val cam = Camera(lookFrom, lookAt, vup, 20f, nx.toFloat() / ny, aperture, focusDistance)
     val rand = Random.Default
 
     val pb = ProgressBar("Rendering", nx * ny.toLong())
@@ -67,6 +66,53 @@ fun main() {
     print("Writing image done")
 
 }
+
+private fun generateWorld(): HittableList {
+    println("Generating world")
+    val world = HittableList()
+//    world.add(Sphere(Vec3(0f, 0f, -1f), 0.5f, Lambertian(Vec3(0.0f, 0.1f, 0.4f))))
+//    world.add(Sphere(Vec3(0f, -100.5f, 1f), 100f, Lambertian(Vec3(0.8f, 0.8f, 0f))))
+//
+//    world.add(Sphere(Vec3(1f, 0f, -1f), 0.5f, Metal(Vec3(0.8f, 0.6f, 0.2f), 0.2f)))
+//    world.add(Sphere(Vec3(-1f, 0f, -1f), 0.5f, Dielectric(3f)))
+
+    world.add(Sphere(Vec3(0f, -1000f, 0f), 1000f, Lambertian(Vec3(0.5f, 0.5f, 0.5f))));
+
+    for (a in -11..10) {
+        for (b in -11..10) {
+            val chooseMat = randomFloat()
+            val center = Vec3(a + 0.9f * randomFloat(), 0.2f, b + 0.9f * randomFloat())
+            if ((center - Vec3(4f, 0.2f, 0f)).length() > 0.9) {
+                when {
+                    chooseMat < 0.8 -> {
+                        // diffuse
+                        val albedo = Vec3(randomFloat(), randomFloat(), randomFloat()) * Vec3(randomFloat(), randomFloat(), randomFloat())
+                        world.add(Sphere(center, 0.2f, Lambertian(albedo)));
+                    }
+                    chooseMat < 0.95 -> {
+                        // metal
+                        val albedo = Vec3(randomFloat(.5f, 1f), randomFloat(.5f, 1f), randomFloat(.5f, 1f));
+                        val fuzz = randomFloat(0f, .5f);
+                        world.add(Sphere(center, 0.2f, Metal(albedo, fuzz)));
+                    }
+                    else -> {
+                        // glass
+                        world.add(Sphere(center, 0.2f, Dielectric(1.5f)));
+                    }
+                }
+            }
+        }
+    }
+
+    world.add(Sphere(Vec3(0f, 1f, 0f), 1.0f, Dielectric(1.5f)));
+
+    world.add(Sphere(Vec3(-4f, 1f, 0f), 1.0f, Lambertian(Vec3(.4f, .2f, .1f))));
+
+    world.add(Sphere(Vec3(4f, 1f, 0f), 1.0f, Metal(Vec3(.7f, .6f, .5f), 0.0f)));
+
+    return world
+}
+
 
 @Suppress("SameParameterValue")
 private fun renderPixel(
@@ -134,4 +180,12 @@ fun randomInUnitSphere(): Vec3 {
         p = 2f * Vec3(random.nextFloat(), random.nextFloat(), random.nextFloat()) - Vec3(1f, 1f, 1f)
     } while (p.squaredLength() >= 1)
     return p
+}
+
+fun randomFloat(): Float {
+    return Random.nextFloat()
+}
+
+fun randomFloat(from: Float, to: Float): Float {
+    return Random.nextDouble(from.toDouble(), to.toDouble()).toFloat()
 }
