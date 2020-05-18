@@ -9,6 +9,9 @@ plugins {
     // Apply the application plugin to add support for building a CLI application.
     application
 }
+tasks.test {
+    useJUnitPlatform()
+}
 
 repositories {
     // Use jcenter for resolving dependencies.
@@ -26,6 +29,9 @@ dependencies {
 
     implementation("me.tongfei:progressbar:0.8.1")
 
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter:5.5.2")
+
 }
 
 application {
@@ -33,7 +39,7 @@ application {
     mainClassName = "rayTracingInAWeeking.ImageKt"
 }
 
-tasks.withType<KotlinCompile>() {
+tasks.withType<KotlinCompile>().configureEach {
     kotlinOptions {
         jvmTarget = "1.8"
     }
