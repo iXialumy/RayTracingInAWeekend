@@ -34,7 +34,6 @@ fun main() {
     val lookAt = Vec3(0f, 0f, 0f)
     val focusDistance = 10f
     val cam = Camera(lookFrom, lookAt, vup, 20f, nx.toFloat() / ny, aperture, focusDistance)
-    val rand = Random.Default
 
     val pb = ProgressBar("Rendering", nx * ny.toLong())
     val values: MutableList<Pair<Int, Int>> = ArrayList()
@@ -48,7 +47,7 @@ fun main() {
     values.map {
         GlobalScope.async {
 //          runBlocking {
-            renderPixel(it, ns, rand, nx, ny, cam, world, maxDepth)
+            renderPixel(it, ns, nx, ny, cam, world, maxDepth)
         }
     }
             .forEach {
@@ -118,7 +117,6 @@ private fun generateWorld(): HittableList {
 private fun renderPixel(
         it: Pair<Int, Int>,
         ns: Int,
-        rand: Random.Default,
         nx: Int,
         ny: Int,
         cam: Camera,
@@ -130,8 +128,8 @@ private fun renderPixel(
     var col = makeUnitVector()
 
     for (s in 0 until ns) {
-        val u = (i + rand.nextFloat()) / nx.toFloat()
-        val v = (j + rand.nextFloat()) / ny.toFloat()
+        val u = (i + randomFloat()) / nx.toFloat()
+        val v = (j + randomFloat()) / ny.toFloat()
         val r = cam.getRay(u, v)
         col += color(r, world, maxDepth)
     }
@@ -174,18 +172,19 @@ fun color(ray: Ray, hittable: Hittable, depth: Int): Vec3 {
 }
 
 fun randomInUnitSphere(): Vec3 {
-    val random = Random.Default
     var p: Vec3
     do {
-        p = 2f * Vec3(random.nextFloat(), random.nextFloat(), random.nextFloat()) - Vec3(1f, 1f, 1f)
+        p = 2f * Vec3(randomFloat(), randomFloat(), randomFloat()) - Vec3(1f, 1f, 1f)
     } while (p.squaredLength() >= 1)
     return p
 }
 
 fun randomFloat(): Float {
+//    return 0.5f
     return Random.nextFloat()
 }
 
 fun randomFloat(from: Float, to: Float): Float {
+//    return 0.5f
     return Random.nextDouble(from.toDouble(), to.toDouble()).toFloat()
 }

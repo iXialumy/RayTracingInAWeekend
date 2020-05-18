@@ -24,7 +24,7 @@ class Dielectric(private val indexOfRefraction: Float) : Material() {
             return Pair(attenuation, scattered)
         }
         val reflectedProb = schlick(cosTheta, etaiOverEtat)
-        if (random() < reflectedProb) {
+        if (randomFloat() < reflectedProb) {
             val reflected = unitDirection.reflect(rec.normal)
             scattered = Ray(rec.p, reflected)
             return Pair(attenuation, scattered)

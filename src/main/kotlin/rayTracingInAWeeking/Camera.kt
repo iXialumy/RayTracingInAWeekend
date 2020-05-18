@@ -36,7 +36,7 @@ class Camera(lookFrom: Vec3, lookAt: Vec3, vup: Vec3, vFov: Float, aspectRatio: 
 
 fun randomInUnitDisk(): Vec3 {
     while (true) {
-        val p = Vec3(((Math.random() - 0.5) * 2).toFloat(), ((Math.random() - 0.5) * 2).toFloat(), 0f)
+        val p = Vec3(((randomFloat() - 0.5f) * 2), (randomFloat() - 0.5f) * 2, 0f)
         if (p.squaredLength() >= 1) {
             continue
         }
